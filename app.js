@@ -14,8 +14,9 @@ const noResults = document.getElementById('noResults');
 async function init() {
     await loadAlbums();
     populateGenreFilter();
+    sortAlbums();
     updateStats();
-    renderAlbums(albums);
+    renderAlbums(filteredAlbums);
     attachEventListeners();
 }
 
@@ -23,6 +24,9 @@ async function init() {
 async function loadAlbums() {
     try {
         const response = await fetch('data.json');
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
         albums = await response.json();
         filteredAlbums = [...albums];
     } catch (error) {
@@ -73,18 +77,27 @@ function renderAlbums(albumsToRender) {
     });
 }
 
+// Escape text before inserting it into HTML
+function escapeHTML(value) {
+    return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+}
+
 // Create album card element
 function createAlbumCard(album) {
     const card = document.createElement('div');
     card.className = 'album-card';
     card.innerHTML = `
-        <div class="album-cover">${album.emoji}</div>
+        <div class="album-cover">${escapeHTML(album.emoji)}</div>
         <div class="album-info">
-            <h3>${album.album}</h3>
-            <p class="artist">${album.artist}</p>
+            <h3>${escapeHTML(album.album)}</h3>
+            <p class="artist">${escapeHTML(album.artist)}</p>
             <div class="album-details">
-                <span class="genre-tag">${album.genre}</span>
-                <span class="year">${album.year}</span>
+                <span class="genre-tag">${escapeHTML(album.genre)}</span>
+                <span class="year">${escapeHTML(album.year)}</span>
             </div>
         </div>
     `;

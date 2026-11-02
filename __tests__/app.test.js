@@ -34,6 +34,7 @@ describe('TuneVault - Music Library Tests', () => {
             ];
 
             global.fetch.mockResolvedValueOnce({
+                ok: true,
                 json: async () => mockData
             });
 
@@ -45,6 +46,14 @@ describe('TuneVault - Music Library Tests', () => {
             global.fetch.mockRejectedValueOnce(new Error('Network error'));
             
             console.error = jest.fn(); // Mock console.error
+            await app.loadAlbums();
+            expect(console.error).toHaveBeenCalled();
+        });
+
+        test('loadAlbums should handle non-OK responses', async () => {
+            global.fetch.mockResolvedValueOnce({ ok: false, status: 404 });
+
+            console.error = jest.fn();
             await app.loadAlbums();
             expect(console.error).toHaveBeenCalled();
         });
@@ -137,5 +146,17 @@ describe('Integration Tests', () => {
         
         const card = app.createAlbumCard(specialAlbum);
         expect(card.innerHTML).toContain("Guns N' Roses");
+    });
+
+    test('createAlbumCard should escape HTML in album data', () => {
+        const card = app.createAlbumCard({
+            artist: '<script>alert(1)</script>',
+            album: 'Test',
+            year: 2024,
+            genre: 'Rock',
+            emoji: '🎵'
+        });
+        expect(card.innerHTML).not.toContain('<script>');
+        expect(card.innerHTML).toContain('&lt;script&gt;');
     });
 });
