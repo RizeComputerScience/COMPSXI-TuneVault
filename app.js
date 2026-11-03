@@ -12,7 +12,7 @@ const noResults = document.getElementById('noResults');
 
 // Initialize app
 async function init() {
-    await loadAlbum();
+    await loadAlbums();
     populateGenreFilter();
     updateStats();
     renderAlbums(albums);
